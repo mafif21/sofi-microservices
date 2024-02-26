@@ -28,8 +28,14 @@ func NewSidangController(service services.SidangService, validator *validator.Va
 }
 
 func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
-	sidangRequest := web.SidangCreateRequest{}
+	if ctx.Locals("role") != "RLMHS" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "unauthorized",
+		})
 
+	}
+
+	sidangRequest := web.SidangCreateRequest{}
 	//success
 	if err := ctx.BodyParser(&sidangRequest); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(web.ErrorResponse{

@@ -3,7 +3,6 @@ package app
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"os"
 	"pendaftaran-sidang/internal/config"
@@ -24,22 +23,17 @@ func StartApp() {
 	})
 	app.Use(cors.New())
 
-	app.Use(basicauth.New(basicauth.Config{
-		Users: map[string]string{
-			"john":  "doe",
-			"admin": "123456",
-		},
-	}))
-
 	validator := validator.New()
 	db := config.OpenConnection()
 
+	//sidang
 	repository := repositories.NewSidangRepository()
 	service := services.NewSidangService(repository, db)
 	sidangController := controller.NewSidangController(service, validator)
 
 	api := app.Group("api")
 	app.Static("/public/doc_ta", "./public/doc_ta")
+
 	routes.SidangRoutes(api, sidangController)
 
 	err := app.Listen(":" + os.Getenv("PORT"))

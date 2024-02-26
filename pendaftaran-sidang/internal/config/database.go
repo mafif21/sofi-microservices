@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"os"
+	"pendaftaran-sidang/internal/model/entity"
 	"time"
 )
 
@@ -33,6 +34,8 @@ func OpenConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	db.AutoMigrate(&entity.Sidang{})
 
 	sqlDB, err := db.DB()
 	sqlDB.SetMaxOpenConns(100)
