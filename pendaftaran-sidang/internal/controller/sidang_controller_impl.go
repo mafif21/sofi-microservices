@@ -20,6 +20,10 @@ type SidangControllerImpl struct {
 	Validator *validator.Validate
 }
 
+type FetchRequest struct {
+	PeminatanId string `json:"peminatan_id"`
+}
+
 func NewSidangController(service services.SidangService, validator *validator.Validate) SidangController {
 	return &SidangControllerImpl{
 		Service:   service,
@@ -36,7 +40,9 @@ func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
 	}
 
 	sidangRequest := web.SidangCreateRequest{}
-	//success
+	userLoggedIn := ctx.Locals("user")
+	user_id := userLoggedIn.(string)
+
 	if err := ctx.BodyParser(&sidangRequest); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(web.ErrorResponse{
 			Code:    fiber.StatusBadRequest,
@@ -73,12 +79,10 @@ func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
 		})
 	}
 
-	//save doc ta local
 	docTa.Filename = docTaFileName
 	sidangRequest.DocTa = docTa.Filename
 	_ = ctx.SaveFile(docTa, fmt.Sprintf("./public/doc_ta/%s", docTa.Filename))
 
-	//save makalah local
 	makalah.Filename = makalahFileName
 	sidangRequest.Makalah = makalah.Filename
 	_ = ctx.SaveFile(docTa, fmt.Sprintf("./public/makalah/%s", makalah.Filename))
@@ -103,7 +107,7 @@ func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
 		"peminatan_id": sidangRequest.Peminatan,
 	})
 
-	req, _ := http.NewRequest("PATCH", "https://a8fd-36-79-198-92.ngrok-free.app/api/sidang/update/187", bytes.NewBuffer(postBody))
+	req, _ := http.NewRequest("PATCH", "https://d092-103-233-100-229.ngrok-free.app/api/sidang/update/"+user_id, bytes.NewBuffer(postBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -116,7 +120,6 @@ func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
 		Data:   sidangResponse,
 	}
 
-	//return ctx.Status(fiber.StatusCreated).JSON(webResponse)
 	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
 }
 

@@ -1,7 +1,7 @@
 package entity
 
 type UserToken struct {
-	UserId   float64
+	UserId   string
 	token    string
 	Role     string
 	Username string

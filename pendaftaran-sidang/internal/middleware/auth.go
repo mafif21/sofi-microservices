@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"pendaftaran-sidang/internal/model/entity"
+	"strconv"
 	"strings"
 )
 
@@ -17,8 +18,6 @@ var secretKey = []byte("secret")
 
 func UserAuthentication(c AuthConfig) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		//db := config.OpenConnection()
-
 		//check header
 		header := ctx.Get("Authorization")
 		if header == "" {
@@ -27,26 +26,24 @@ func UserAuthentication(c AuthConfig) fiber.Handler {
 
 		tokenString := strings.Replace(header, "Bearer ", "", 1)
 
-		// check user token is valid
 		userToken := entity.UserToken{}
 
 		validateJWT, err := ValidateJWT(tokenString)
 		if err != nil {
-			fmt.Println(err)
+			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"message": "JWT NOT VALID",
+			})
 		}
 
-		//fmt.Println("type:", reflect.TypeOf(validateJWT["id"]))
+		user_id := validateJWT["id"].(float64)
 
-		userToken.UserId = validateJWT["id"].(float64)
+		userToken.UserId = strconv.FormatFloat(user_id, 'f', -1, 64)
 		userToken.Nama = validateJWT["nama"].(string)
 		userToken.Role = validateJWT["role"].(string)
 		userToken.Username = validateJWT["username"].(string)
 
-		fmt.Println(userToken.Role)
-
 		ctx.Locals("user", userToken.UserId)
 		ctx.Locals("role", userToken.Role)
-
 		return ctx.Next()
 	}
 }
