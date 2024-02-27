@@ -5,7 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"pendaftaran-sidang/internal/model/entity"
-	"strconv"
 	"strings"
 )
 
@@ -37,7 +36,7 @@ func UserAuthentication(c AuthConfig) fiber.Handler {
 
 		user_id := validateJWT["id"].(float64)
 
-		userToken.UserId = strconv.FormatFloat(user_id, 'f', -1, 64)
+		userToken.UserId = int(user_id)
 		userToken.Nama = validateJWT["nama"].(string)
 		userToken.Role = validateJWT["role"].(string)
 		userToken.Username = validateJWT["username"].(string)

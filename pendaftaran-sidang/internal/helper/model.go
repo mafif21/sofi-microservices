@@ -8,7 +8,8 @@ import (
 func ToSidangResponse(sidang entity.Sidang) web.SidangResponse {
 	return web.SidangResponse{
 		Id:                sidang.ID,
-		MahasiswaId:       sidang.MahasiswaId,
+		UserId:            sidang.UserId,
+		Nim:               sidang.Nim,
 		Pembimbing1Id:     sidang.Pembimbing1Id,
 		Pembimbing2Id:     sidang.Pembimbing2Id,
 		Judul:             sidang.Judul,

@@ -4,7 +4,8 @@ import "time"
 
 type Sidang struct {
 	ID                int       `gorm:"primaryKey;column:id;autoIncrement"`
-	MahasiswaId       int       `gorm:"column:mahasiswa_id"`       // user nim
+	UserId            int       `gorm:"column:user_id"`
+	Nim               int       `gorm:"column:nim"`                // user nim
 	Pembimbing1Id     int       `gorm:"column:pembimbing1_id"`     // api ta
 	Pembimbing2Id     int       `gorm:"column:pembimbing2_id"`     // api ta
 	Judul             string    `gorm:"column:judul"`              // api ta

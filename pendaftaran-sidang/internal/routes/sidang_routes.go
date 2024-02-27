@@ -17,4 +17,6 @@ func SidangRoutes(router fiber.Router, controller controller.SidangController) {
 		},
 	}), controller.Create)
 
+	product.Patch("/update/:id", controller.Update)
+
 }

@@ -4,7 +4,8 @@ import "time"
 
 type SidangResponse struct {
 	Id                int       `json:"id"`
-	MahasiswaId       int       `json:"mahasiswa_id"`
+	UserId            int       `json:"user_id"`
+	Nim               int       `json:"Nim"`
 	Pembimbing1Id     int       `json:"pembimbing1_id"`
 	Pembimbing2Id     int       `json:"pembimbing2_id"`
 	Judul             string    `json:"judul"`
