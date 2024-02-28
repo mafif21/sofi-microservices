@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/exp/slices"
 	"mime/multipart"
 	"path/filepath"
 	"pendaftaran-sidang/internal/model/web"
@@ -31,7 +32,14 @@ func NewSidangController(service services.SidangService, validator *validator.Va
 }
 
 func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
-	if ctx.Locals("role") != "RLMHS" {
+	userRoles := ctx.Locals("role").([]string) // user login role
+	rolesToCheck := []string{"RLMHS"}          // who can access
+
+	canAccess := slices.ContainsFunc(rolesToCheck, func(target string) bool {
+		return slices.Contains(userRoles, target)
+	})
+
+	if canAccess != true {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthorized",
 		})
@@ -121,20 +129,59 @@ func (controller SidangControllerImpl) Create(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
 }
 
+func (controller SidangControllerImpl) FindByUser(ctx *fiber.Ctx) error {
+	userRoles := ctx.Locals("role").([]string) // user login role
+	rolesToCheck := []string{"RLMHS"}          // who can access
+
+	canAccess := slices.ContainsFunc(rolesToCheck, func(target string) bool {
+		return slices.Contains(userRoles, target)
+	})
+
+	if canAccess != true {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "unauthorized",
+		})
+	}
+
+	userLoggedIn := ctx.Locals("user")
+	userId := userLoggedIn.(int)
+	result, err := controller.Service.GetSidangLoggedIn(userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  fiber.StatusNotFound,
+			"message": "Data not found",
+		})
+	}
+
+	webResponse := web.WebResponse{
+		Code:   fiber.StatusOK,
+		Status: "Sidang has been found",
+		Data:   result,
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+}
+
 func (controller SidangControllerImpl) Update(ctx *fiber.Ctx) error {
-	//if ctx.Locals("role") != "RLMHS" {
-	//	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	//		"message": "unauthorized",
-	//	})
-	//}
+	userRoles := ctx.Locals("role").([]string) // user login role
+	rolesToCheck := []string{"RLMHS"}          // who can access
+
+	canAccess := slices.ContainsFunc(rolesToCheck, func(target string) bool {
+		return slices.Contains(userRoles, target)
+	})
+
+	if canAccess != true {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "unauthorized",
+		})
+	}
 
 	id, _ := strconv.Atoi(ctx.Params("id"))
 	sidangRequest := web.SidangUpdateRequest{}
 	sidangRequest.Id = id
-	sidangRequest.UserId = 187
 
-	//userLoggedIn := ctx.Locals("user")
-	//sidangRequest.UserId = userLoggedIn.(int)
+	userLoggedIn := ctx.Locals("user")
+	sidangRequest.UserId = userLoggedIn.(int)
 
 	if err := ctx.BodyParser(&sidangRequest); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(web.ErrorResponse{
@@ -199,7 +246,7 @@ func (controller SidangControllerImpl) Update(ctx *fiber.Ctx) error {
 	client := resty.New()
 	_, err = client.R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(payload).Patch("https://41f5-36-79-198-92.ngrok-free.app/api/sidang/update/" + strconv.Itoa(sidangRequest.UserId))
+		SetBody(payload).Patch("https://f4a9-182-253-123-0.ngrok-free.app/api/sidang/update/" + strconv.Itoa(sidangRequest.UserId))
 
 	if err != nil {
 		return ctx.Status(fiber.StatusCreated).JSON(web.ErrorResponse{

@@ -96,6 +96,18 @@ func (service SidangServiceImpl) Update(request *web.SidangUpdateRequest) (*web.
 	return &response, nil
 }
 
+func (service SidangServiceImpl) GetSidangLoggedIn(userId int) (*web.SidangResponse, error) {
+	db := config.OpenConnection()
+
+	sidangLoggedIn, err := service.Repository.GetSidangByUserId(db, userId)
+	if err != nil {
+		return nil, &exception.ErrorMessage{Message: err.Error()}
+	}
+
+	response := helper.ToSidangResponse(*sidangLoggedIn)
+	return &response, nil
+}
+
 func (service SidangServiceImpl) FindById(userId int) (*web.SidangResponse, error) {
 	db := config.OpenConnection()
 

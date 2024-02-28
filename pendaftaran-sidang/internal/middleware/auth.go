@@ -38,12 +38,27 @@ func UserAuthentication(c AuthConfig) fiber.Handler {
 
 		userToken.UserId = int(user_id)
 		userToken.Nama = validateJWT["nama"].(string)
-		userToken.Role = validateJWT["role"].(string)
+
+		rolesInterface, ok := validateJWT["role"].([]interface{})
+		if !ok {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Role conversion error",
+			})
+		}
+		for _, role := range rolesInterface {
+			userToken.Role = append(userToken.Role, role.(string))
+		}
+
+		//userToken.Role = validateJWT["role"].(string)
 		userToken.Username = validateJWT["username"].(string)
 
 		ctx.Locals("user", userToken.UserId)
 		ctx.Locals("role", userToken.Role)
+
 		return ctx.Next()
+		//return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		//	"roles": ctx.Locals("role"),
+		//})
 	}
 }
 

@@ -21,6 +21,16 @@ func (repo SidangRepositoryImpl) Save(db *gorm.DB, sidang *entity.Sidang) (*enti
 	return sidang, nil
 }
 
+func (repo SidangRepositoryImpl) GetSidangByUserId(db *gorm.DB, userId int) (*entity.Sidang, error) {
+	var sidang *entity.Sidang
+	err := db.Take(&sidang, "user_id = ?", userId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return sidang, nil
+}
+
 func (repo SidangRepositoryImpl) Update(db *gorm.DB, sidang *entity.Sidang) (*entity.Sidang, error) {
 	err := db.Model(&entity.Sidang{}).Where("user_id = ?", sidang.UserId).Updates(sidang).Error
 	if err != nil {

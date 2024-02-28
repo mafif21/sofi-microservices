@@ -17,6 +17,20 @@ func SidangRoutes(router fiber.Router, controller controller.SidangController) {
 		},
 	}), controller.Create)
 
-	product.Patch("/update/:id", controller.Update)
+	product.Patch("/update/:id", middleware.UserAuthentication(middleware.AuthConfig{
+		Unauthorized: func(ctx *fiber.Ctx) error {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Unauthorized",
+			})
+		},
+	}), controller.Update)
+
+	product.Get("/check-user", middleware.UserAuthentication(middleware.AuthConfig{
+		Unauthorized: func(ctx *fiber.Ctx) error {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Unauthorized",
+			})
+		},
+	}), controller.FindByUser)
 
 }
